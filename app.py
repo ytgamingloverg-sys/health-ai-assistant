@@ -1,6 +1,5 @@
 import streamlit as st
 import requests
-import PyPDF2
 from PIL import Image
 import io
 
