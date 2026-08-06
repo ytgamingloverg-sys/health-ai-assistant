@@ -1,111 +1,74 @@
+import streamlit as st
 import requests
 
-API_KEY = st.secrets["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"]
+# ===========================
+# PAGE CONFIG
+# ===========================
 
-url = "https://api.x.ai/v1/chat/completions"
+st.set_page_config(
+    page_title="MUSHFIK AI HEALTH ASSISTANT",
+    page_icon="🩺",
+    layout="wide"
+)
 
-headers = {
-    "Authorization": f"Bearer {API_KEY}",
-    "Content-Type": "application/json"
-}
+# ===========================
+# GROQ API KEY
+# ===========================
 
-data = {
-    "model": "grok-4",
-    "messages": [
-        {
-            "role": "system",
-            "content": "You are a helpful AI medical assistant."
-        },
-        {
-            "role": "user",
-            "content": "আমার মাথা ব্যথা করছে।"
-        }
-    ]
-}
+API_KEY = "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"   # <-- এখানে তোমার API Key বসাও
 
-response = requests.post(url, headers=headers, json=data)
-print(response.json())
-# ==========================================
-# SIDEBAR
-# ==========================================
+# ===========================
+# TITLE
+# ===========================
 
-with st.sidebar:
+st.title("🩺 MUSHFIK AI HEALTH ASSISTANT")
+st.write("Powered by Groq AI")
 
-    st.title("🩺 AI Doctor")
+# ===========================
+# CHAT
+# ===========================
 
-    st.success("🟢 System Online")
+user_input = st.chat_input("আপনার সমস্যা লিখুন...")
 
-    st.markdown("---")
+if user_input:
 
-    st.write("### Features")
+    st.chat_message("user").write(user_input)
 
-    st.write("🤖 Human AI Doctor")
-    st.write("💬 Chat Mode")
-    st.write("📄 Medical Report Upload")
-    st.write("❤️ Sensor Dashboard")
-    st.write("🎤 Voice Assistant")
-    st.write("🌍 Bangla + English")
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json"
+    }
 
-    st.markdown("---")
+    data = {
+        "model": "llama-3.3-70b-versatile",
+        "messages": [
+            {
+                "role": "system",
+                "content": (
+                    "You are an AI Health Assistant. "
+                    "Never claim to be a licensed doctor. "
+                    "Ask follow-up questions when needed and advise users to seek professional care for emergencies."
+                )
+            },
+            {
+                "role": "user",
+                "content": user_input
+            }
+        ]
+    }
 
-    if api_key:
-        st.success("✅ Grok API Connected")
+    response = requests.post(
+        "https://api.groq.com/openai/v1/chat/completions",
+        headers=headers,
+        json=data
+    )
+
+    if response.status_code == 200:
+
+        reply = response.json()["choices"][0]["message"]["content"]
+
+        st.chat_message("assistant").write(reply)
+
     else:
-        st.error("❌ Grok API Key Not Found")
 
-    st.markdown("---")
-
-    st.info(
-        "⚠️ This AI provides educational information only. "
-        "It is not a replacement for a licensed doctor."
-    )
-
-
-# ==========================================
-# MAIN LAYOUT
-# ==========================================
-
-left, right = st.columns([1, 2])
-
-with left:
-
-    st.markdown("## 👨‍⚕️ AI Doctor")
-
-    st.image(
-        "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=500",
-        use_container_width=True
-    )
-
-    st.success("AI Doctor is Ready")
-
-with right:
-
-    st.markdown("## 💬 Talk with AI Doctor")
-
-    st.write(
-        """
-Welcome!
-
-I am your AI Health Assistant.
-
-You can:
-
-- Describe your symptoms
-- Upload medical reports
-- Ask health questions
-- Connect health sensors
-"""
-    )
-
-
-# ==========================================
-# CHAT HISTORY
-# ==========================================
-
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-for msg in st.session_state.messages:
-
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
+        st.error(response.text)
