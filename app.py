@@ -1,6 +1,6 @@
 import requests
 
-API_KEY = st.secrets["XAI_API_KEY"]
+API_KEY = st.secrets["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"]
 
 url = "https://api.x.ai/v1/chat/completions"
 
