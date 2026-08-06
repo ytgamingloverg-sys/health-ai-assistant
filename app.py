@@ -1,74 +1,97 @@
 import streamlit as st
 import requests
+import PyPDF2
+from PIL import Image
+import io
 
-# ===========================
+# ==========================================
+# GROQ API KEY
+# ==========================================
+
+API_KEY = "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"
+
+# ==========================================
 # PAGE CONFIG
-# ===========================
+# ==========================================
 
 st.set_page_config(
-    page_title="MUSHFIK AI HEALTH ASSISTANT",
+    page_title="মুশফিক এআই স্বাস্থ্য সহকারী",
     page_icon="🩺",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# ===========================
-# GROQ API KEY
-# ===========================
+# ==========================================
+# PREMIUM CSS
+# ==========================================
 
-API_KEY = "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"   # <-- এখানে তোমার API Key বসাও
+st.markdown("""
+<style>
 
-# ===========================
+#MainMenu{
+visibility:hidden;
+}
+
+footer{
+visibility:hidden;
+}
+
+header{
+visibility:hidden;
+}
+
+.stApp{
+background:linear-gradient(135deg,#071A2F,#0B2945,#133B5C);
+color:white;
+}
+
+.title{
+
+font-size:55px;
+font-weight:bold;
+text-align:center;
+color:#00E5FF;
+
+}
+
+.subtitle{
+
+font-size:22px;
+text-align:center;
+margin-bottom:30px;
+
+}
+
+.card{
+
+background:rgba(255,255,255,.08);
+padding:20px;
+border-radius:20px;
+backdrop-filter:blur(12px);
+margin-bottom:20px;
+
+}
+
+</style>
+""",unsafe_allow_html=True)
+
+# ==========================================
 # TITLE
-# ===========================
+# ==========================================
 
-st.title("🩺 MUSHFIK AI HEALTH ASSISTANT")
-st.write("Powered by Groq AI")
+st.markdown(
+'<div class="title">🩺 মুশফিক এআই স্বাস্থ্য সহকারী</div>',
+unsafe_allow_html=True
+)
 
-# ===========================
-# CHAT
-# ===========================
+st.markdown(
+'<div class="subtitle">বাংলা ভাষাভিত্তিক ভার্চুয়াল এআই ডাক্তার</div>',
+unsafe_allow_html=True
+)
 
-user_input = st.chat_input("আপনার সমস্যা লিখুন...")
+# ==========================================
+# SESSION
+# ==========================================
 
-if user_input:
-
-    st.chat_message("user").write(user_input)
-
-    headers = {
-        "Authorization": f"Bearer {API_KEY}",
-        "Content-Type": "application/json"
-    }
-
-    data = {
-        "model": "llama-3.3-70b-versatile",
-        "messages": [
-            {
-                "role": "system",
-                "content": (
-                    "You are an AI Health Assistant. "
-                    "Never claim to be a licensed doctor. "
-                    "Ask follow-up questions when needed and advise users to seek professional care for emergencies."
-                )
-            },
-            {
-                "role": "user",
-                "content": user_input
-            }
-        ]
-    }
-
-    response = requests.post(
-        "https://api.groq.com/openai/v1/chat/completions",
-        headers=headers,
-        json=data
-    )
-
-    if response.status_code == 200:
-
-        reply = response.json()["choices"][0]["message"]["content"]
-
-        st.chat_message("assistant").write(reply)
-
-    else:
-
-        st.error(response.text)
+if "messages" not in st.session_state:
+    st.session_state.messages=[]
